@@ -1,0 +1,23 @@
+[
+	{
+		"restaurant_id": 1,
+		"restaurant_name": "Brock's BBQ",
+		"restaurant_coord": "G2",
+		"restaurant_lat": 52.527806,
+		"restaurant_lng": 13.406000
+	},
+	{
+		"restaurant_id": 2,
+		"restaurant_name": "Elegant Egyptian",
+		"restaurant_coord": "I6",
+		"restaurant_lat": 52.527753,
+		"restaurant_lng": 13.405978
+	},
+	{
+		"restaurant_id": 3,
+		"restaurant_name": "OMG Omelettes",
+		"restaurant_coord": "D7",
+		"restaurant_lat": 52.519886,
+		"restaurant_lng": 13.412459
+	}
+]

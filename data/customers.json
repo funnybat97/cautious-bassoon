@@ -1,0 +1,30 @@
+[
+	{
+		"customer_id": 1,
+		"customer_name": "Emily Tang",
+		"customer_coord": "F3",
+		"customer_lat": 52.527806,
+		"customer_lng": 13.406000
+	},
+	{
+		"customer_id": 2,
+		"customer_name": "Marina Brawl",
+		"customer_coord": "B3",
+		"customer_lat": 52.527753,
+		"customer_lng": 13.405978
+	},
+	{
+		"customer_id": 3,
+		"customer_name": "Fei Luke",
+		"customer_coord": "G6",
+		"customer_lat": 52.519886,
+		"customer_lng": 13.412459
+	},
+	{
+		"customer_id": 4,
+		"customer_name": "Jack Black",
+		"customer_coord": "J2",
+		"customer_lat": 52.530668,
+		"customer_lng": 13.424910
+	}
+]

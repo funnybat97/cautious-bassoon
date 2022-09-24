@@ -1,4 +1,4 @@
-import math
+import geopy.distance
 
 # maping filed to numbers
 y_fields = {
@@ -101,10 +101,9 @@ def get_path(source, destination):
     print(path)
     return path
 
-# culcultiate
+# get distance between two points
 def get_rider_distance(x1, y1, x2, y2):
-    return math.hypot(x2 - x1, y2 - y1)
-
+    return geopy.distance.geodesic((x1,y1), (x2,y2)).m
 
 # Driver code
 if __name__ == '__main__':

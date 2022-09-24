@@ -1,5 +1,5 @@
 from navigate import db
-from sqlalchemy import Column, Integer, String, Sequence, Float, Time, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Sequence, Float, TIMESTAMP, Boolean, ForeignKey
 
 
 class Customer(db.Model):
@@ -16,6 +16,10 @@ class Customer(db.Model):
 class Rider(db.Model):
     rider_id = Column(String(50),primary_key=True)
     name = Column(String(50))
+    status = Column(Boolean, default=False)
+    rider_coord = Column(String(50))
+    rider_lat = Column(Float)
+    rider_lng = Column(Float)
 
     def __repr__(self):
         return f'Rider: {self.name}'
@@ -33,21 +37,22 @@ class Restaurant(db.Model):
 
 
 class Order(db.Model):
-    order_id = Column(String(50), primary_key=True)
-    ordered_at = Column(Time)
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    order_id = Column(String(50))
+    ordered_at = Column(TIMESTAMP)
     order_value = Column(Float)
     restaurant_id = Column(Integer)
     customer_id = Column(Integer)
-    status = Column(Boolean)
+    status = Column(Boolean, default=False)
 
     def __repr__(self):
         return f'Order value: {self.order_value}'
 
 class History(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    order_id = Column(String(50), ForeignKey("order.order_id"))
-    order_pickup_time = Column(Time)
-    order_pickup_time = Column(Time)
+    order_id = Column(String(50))
+    order_pickup_time = Column(TIMESTAMP)
+    order_delivery_time = Column(TIMESTAMP)
     order_delivery_distance = Column(Integer)
     rider_name = Column(String(50))
     restaurant_id=Column(Integer, ForeignKey("customer.customer_id"))
@@ -55,5 +60,5 @@ class History(db.Model):
     directions_to_customer = Column(String(256))
 
     def __repr__(self):
-        return f'Order pickup time: {self.order_pickup_time}'
+        return f'Order pickup TIMESTAMP: {self.order_pickup_TIMESTAMP}'
 

@@ -11,3 +11,6 @@ db = SQLAlchemy(app)
 
 from navigate import routers
 from navigate import models
+
+if __name__ == '__main__':
+    app.run(port=5000, debug = True)

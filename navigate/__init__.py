@@ -1,16 +1,17 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+
 app = Flask(__name__)
 username = 'navigator'
 password = 'password'
 database = 'navigate_db'
+DB_PORT = '5432'
+DB_HOST = 'localhost'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{username}:{password}@{DB_HOST}:{DB_PORT}/{database}"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{username}:{password}@localhost:5432/{database}"
 db = SQLAlchemy(app)
 
 from navigate import routers
 from navigate import models
-
-if __name__ == '__main__':
-    app.run(port=5000, debug = True)
+from navigate import insert_data

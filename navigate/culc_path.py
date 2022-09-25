@@ -1,4 +1,8 @@
 import geopy.distance
+from navigate import db
+from navigate import models
+from navigate import culc_path
+import datetime
 
 # maping filed to numbers
 y_fields = {
@@ -98,16 +102,109 @@ def get_path(source, destination):
     while sum != 0:
         sum, next_move, x, y = get_next_step(x, y, dx, dy, sum)
         path = path + next_move
-    print(path)
+
     return path
 
 # get distance between two points
 def get_rider_distance(x1, y1, x2, y2):
     return geopy.distance.geodesic((x1,y1), (x2,y2)).m
 
-# Driver code
-if __name__ == '__main__':
-    src = coord_converter('D7')
-    dest = coord_converter('F3')
-    get_path(src, dest)
+# pick_next_rider_for_order
+def pick_order(order):
+    order_restaurant = models.Restaurant.query.filter_by(restaurant_id=order.restaurant_id).first()
+    order_customer = models.Customer.query.filter_by(customer_id=order.customer_id).first()
+    rider = models.Rider.query.filter_by(status=False).first()
+
+    if rider:
+        distance_to_restaurant = 0
+        distance_to_customer = culc_path.get_rider_distance(
+            order_restaurant.restaurant_lng,
+            order_restaurant.restaurant_lat,
+            order_customer.customer_lng,
+            order_customer.customer_lat
+        )
+        distance = distance_to_restaurant + distance_to_customer
+        path_to_restaurant = culc_path.get_path(
+            culc_path.coord_converter('', True),
+            culc_path.coord_converter(order_restaurant.restaurant_coord)
+        )
+        path_to_customer = culc_path.get_path(
+            culc_path.coord_converter(order_restaurant.restaurant_coord),
+            culc_path.coord_converter(order_customer.customer_coord)
+        )
+        full_path = path_to_restaurant + path_to_customer
+        order_delivery_time = order.ordered_at + datetime.timedelta(minutes=round(distance / 100))
+        history = models.History(
+            order_id=order.order_id,
+            order_pickup_time=order.ordered_at,
+            order_delivery_time=order_delivery_time,
+            order_delivery_distance=distance,
+            rider_name=rider.name,
+            restaurant_id=order.restaurant_id,
+            customer_id=order.customer_id,
+            directions_to_customer=full_path
+        )
+
+        rider.status = True
+        rider.rider_coord = order_customer.customer_coord
+        rider.rider_lat = order_customer.customer_lat
+        rider.rider_lng = order_customer.customer_lng
+        rider.rider_free_at = order_delivery_time
+        db.session.add(history)
+        db.session.commit()
+    else:
+        result = db.engine.execute(f'''
+                select r.rider_id,
+                   (ST_DistanceSphere(
+                        ST_MakePoint({order_restaurant.restaurant_lng},{order_restaurant.restaurant_lat}),
+                        ST_MakePoint(r.rider_lng,r.rider_lat )
+                    )
+                    +
+                    ST_DistanceSphere(
+                        ST_MakePoint(r.rider_lng,r.rider_lat),
+                        ST_MakePoint({order_customer.customer_lng},{order_customer.customer_lat})
+                    ))::int as order_delivery_distance,
+                     r.rider_free_at + ((ST_DistanceSphere(
+                        ST_MakePoint({order_restaurant.restaurant_lng},{order_restaurant.restaurant_lat}),
+                        ST_MakePoint(r.rider_lng,r.rider_lat )
+                    )
+                    +
+                    ST_DistanceSphere(
+                        ST_MakePoint(r.rider_lng,r.rider_lat),
+                        ST_MakePoint({order_customer.customer_lng},{order_customer.customer_lat})
+                    )::int)/100 * interval '1 minute') as order_delivery_time
+                from rider r
+                order by 3
+                ''').first()
+        rider = models.Rider.query.filter_by(rider_id=result[0]).first()
+        distance = result[1]
+        path_to_restaurant = culc_path.get_path(
+            culc_path.coord_converter(rider.rider_coord),
+            culc_path.coord_converter(order_restaurant.restaurant_coord)
+        )
+        path_to_customer = culc_path.get_path(
+            culc_path.coord_converter(order_restaurant.restaurant_coord),
+            culc_path.coord_converter(order_customer.customer_coord)
+        )
+        full_path = path_to_restaurant + path_to_customer
+        order_delivery_time = result[2]
+        history = models.History(
+            order_id=order.order_id,
+            order_pickup_time=order.ordered_at,
+            order_delivery_time=order_delivery_time,
+            order_delivery_distance=distance,
+            rider_name=rider.name,
+            restaurant_id=order.restaurant_id,
+            customer_id=order.customer_id,
+            directions_to_customer=full_path
+        )
+
+        rider.status = True
+        rider.rider_coord = order_customer.customer_coord
+        rider.rider_lat = order_customer.customer_lat
+        rider.rider_lng = order_customer.customer_lng
+        rider.rider_free_at = order_delivery_time
+        db.session.add(history)
+        db.session.commit()
+
 

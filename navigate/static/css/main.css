@@ -16,6 +16,7 @@ table, td, th {
 }
 
 table {
+    margin: auto;
     border-collapse: collapse;
     width: 100%;
 }
